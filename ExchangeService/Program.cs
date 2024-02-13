@@ -1,3 +1,7 @@
+using ExchangeService.Entity;
+using ExchangeService.Repositories;
+using ExchangeService.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -7,7 +11,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var app = builder.Build();
+var appConnectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+builder.Services.AddDbContext<ExchangeDbContext>(options => options.UseSqlServer(appConnectionString));
+
+//Register Scope
+builder.Services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
+var app = builder.Build(); 
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
